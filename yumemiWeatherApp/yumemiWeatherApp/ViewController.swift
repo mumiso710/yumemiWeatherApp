@@ -13,7 +13,7 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        let weatherImageView = makeWeatherImageView()
+        let weatherImageView = makeWeatherImageView(area: "tokyo")
         
         let blueLabel = makeLabel(labelName: "blue label", labelColor: UIColor.blue)
         let redLabel = makeLabel(labelName: "red label", labelColor: UIColor.red)
@@ -33,19 +33,17 @@ class ViewController: UIViewController {
         weatherImageView.heightAnchor.constraint(equalTo: view.widthAnchor, multiplier: 0.5).isActive = true
         
         vStack.addArrangedSubview(labelStack)
-      
+        
         // arrange vStack
         vStack.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
         vStack.centerYAnchor.constraint(equalTo: view.centerYAnchor).isActive = true
-
+        
         let closeButton = makeButton(buttonName: "Close")
         let reloadButton = makeButton(buttonName: "Reload")
         
         // when "ReloadButton" pressed, update the weather image
         reloadButton.addAction(UIAction(handler: { _ in
-            let weather = YumemiWeather.fetchWeather()
-            weatherImageView.image = UIImage(named: weather)
-            weatherImageView.image = weatherImageView.image?.withTintColor(self.getImageColor(weather: weather), renderingMode: .alwaysOriginal)
+            weatherImageView.image = self.makeWeatherImage(area: "tokyo")
         }), for: .touchUpInside)
         
         let buttonStack = arrangeTwoItemToHStack(Item1: closeButton, Item2: reloadButton)
@@ -55,24 +53,45 @@ class ViewController: UIViewController {
         buttonStack.widthAnchor.constraint(equalTo: vStack.widthAnchor).isActive = true
         buttonStack.topAnchor.constraint(equalTo: vStack.bottomAnchor, constant: 80).isActive = true
         buttonStack.leadingAnchor.constraint(equalTo: vStack.leadingAnchor).isActive = true
-    
+        
     }
     
-    
-    fileprivate func makeWeatherImageView() -> UIImageView{
-        
-        let weather = YumemiWeather.fetchWeather()
-        
-        var image = UIImage(named: weather)
-        let imageColor = getImageColor(weather: weather)
-        image = image?.withTintColor(imageColor, renderingMode: .alwaysOriginal)
+    fileprivate func makeWeatherImageView(area: String) -> UIImageView {
+        let image = makeWeatherImage(area: area)
         let imageView = UIImageView(image: image)
-        
-        imageView.translatesAutoresizingMaskIntoConstraints = false
-        
         return imageView
-  
     }
+    
+    
+    fileprivate func makeWeatherImage(area: String) -> UIImage {
+        
+        do {
+            let weather = try YumemiWeather.fetchWeather(at: area)
+            var image = UIImage(named: weather)!
+            let imageColor = getImageColor(weather: weather)
+            image = image.withTintColor(imageColor)
+            return image
+        } catch YumemiWeatherError.invalidParameterError {
+            presentAlert(alertTitle: "Invalid Parameter Error", alertMessage: "\(area) is not supported by this app.")
+            return UIImage()
+        } catch YumemiWeatherError.jsonDecodeError {
+            presentAlert(alertTitle: "JSON Decode Error", alertMessage: "unknown error occurred.")
+            return UIImage()
+        } catch YumemiWeatherError.unknownError {
+            presentAlert(alertTitle: "Unknown Error", alertMessage: "unknown error occurred.")
+            return UIImage()
+        } catch {
+            print("Please press the \"Reload\" button")
+            return UIImage()
+        }
+    }
+    
+    fileprivate func presentAlert(alertTitle: String, alertMessage: String) {
+        let alert = UIAlertController(title: alertTitle, message: alertMessage, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "OK", style: .default))
+        self.present(alert, animated: true)
+    }
+    
     
     fileprivate func getImageColor(weather: String) -> UIColor {
         if weather == "sunny" {
@@ -105,7 +124,7 @@ class ViewController: UIViewController {
     }
     
     fileprivate func arrangeTwoItemToHStack(Item1: UIView, Item2: UIView) -> UIStackView {
-
+        
         let stack = UIStackView()
         stack.translatesAutoresizingMaskIntoConstraints = false
         stack.addArrangedSubview(Item1)
