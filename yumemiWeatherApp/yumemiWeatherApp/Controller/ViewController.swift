@@ -10,14 +10,17 @@ import YumemiWeather
 
 class ViewController: UIViewController {
     
+    var minTempLabel: UILabel! = nil
+    var maxTempLabel: UILabel! = nil
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
         let weatherImageView = makeWeatherImageView(area: "tokyo")
         
-        let blueLabel = makeLabel(labelName: "blue label", labelColor: UIColor.blue)
-        let redLabel = makeLabel(labelName: "red label", labelColor: UIColor.red)
-        let labelStack = arrangeTwoItemToHStack(Item1: blueLabel, Item2: redLabel)
+        minTempLabel = makeLabel(labelName: "min temp", labelColor: UIColor.blue)
+        maxTempLabel = makeLabel(labelName: "max temp", labelColor: UIColor.red)
+        let labelStack = arrangeTwoItemToHStack(Item1: minTempLabel, Item2: maxTempLabel)
         
         // vStack set up
         let vStack = UIStackView()
@@ -43,7 +46,7 @@ class ViewController: UIViewController {
         
         // when "ReloadButton" pressed, update the weather image
         reloadButton.addAction(UIAction(handler: { _ in
-            weatherImageView.image = self.makeWeatherImage(area: "tokyo")
+            weatherImageView.image = self.updateWeather(area: "tokyo")
         }), for: .touchUpInside)
         
         let buttonStack = arrangeTwoItemToHStack(Item1: closeButton, Item2: reloadButton)
@@ -57,20 +60,49 @@ class ViewController: UIViewController {
     }
     
     fileprivate func makeWeatherImageView(area: String) -> UIImageView {
-        let image = makeWeatherImage(area: area)
+        let image = updateWeather(area: area)
         let imageView = UIImageView(image: image)
         return imageView
     }
     
     
-    fileprivate func makeWeatherImage(area: String) -> UIImage {
+    fileprivate func makeJSONSearchData(area: String) -> String? {
+        let searchData = SearchData(area: area)
+        let encoder = JSONEncoder()
+        do {
+            let data = try encoder.encode(searchData)
+            return String(data: data, encoding: .utf8)
+        } catch {
+            print(error)
+            return nil
+        }
+    }
+    
+    fileprivate func parseJSON(stringData: String) -> WeatherData? {
+        let decoder = JSONDecoder()
+        do {
+            let decodedData = try decoder.decode(WeatherData.self, from: stringData.data(using: .utf8)!)
+            return decodedData
+        } catch {
+            print(error)
+            return nil
+        }
+    }
+    
+    fileprivate func updateWeather(area: String) -> UIImage? {
+        
+        let searchData = makeJSONSearchData(area: area)!
         
         do {
-            let weather = try YumemiWeather.fetchWeather(at: area)
-            var image = UIImage(named: weather)!
-            let imageColor = getImageColor(weather: weather)
+            let jsonWeather = try YumemiWeather.fetchWeather(searchData)
+            let weatherData = parseJSON(stringData: jsonWeather)!
+            var image = UIImage(named: weatherData.weather)!
+            let imageColor = getImageColor(weather: weatherData.weather)
             image = image.withTintColor(imageColor)
+            minTempLabel.text = String(weatherData.min_temp)
+            maxTempLabel.text = String(weatherData.max_temp)
             return image
+            
         } catch YumemiWeatherError.invalidParameterError {
             presentAlert(alertTitle: "Invalid Parameter Error", alertMessage: "\(area) is not supported by this app.")
             return UIImage()
