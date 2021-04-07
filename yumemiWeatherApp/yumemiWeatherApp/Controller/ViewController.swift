@@ -16,11 +16,15 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        let weatherImageView = makeWeatherImageView(area: "tokyo")
+        view.backgroundColor = UIColor.white
         
         minTempLabel = makeLabel(labelName: "min temp", labelColor: UIColor.blue)
         maxTempLabel = makeLabel(labelName: "max temp", labelColor: UIColor.red)
         let labelStack = arrangeTwoItemToHStack(Item1: minTempLabel, Item2: maxTempLabel)
+        
+        let weatherImageView = makeWeatherImageView(area: "tokyo")
+        
+        
         
         // vStack set up
         let vStack = UIStackView()
@@ -47,6 +51,11 @@ class ViewController: UIViewController {
         // when "ReloadButton" pressed, update the weather image
         reloadButton.addAction(UIAction(handler: { _ in
             weatherImageView.image = self.updateWeather(area: "tokyo")
+        }), for: .touchUpInside)
+        
+        // when "CloseButton" pressed, close ViewController
+        closeButton.addAction(UIAction(handler: { _ in
+            self.dismiss(animated: true)
         }), for: .touchUpInside)
         
         let buttonStack = arrangeTwoItemToHStack(Item1: closeButton, Item2: reloadButton)
@@ -166,5 +175,10 @@ class ViewController: UIViewController {
         return stack
     }
     
+    override func viewDidDisappear(_ animated: Bool) {
+        let nextVC = ViewController()
+        nextVC.modalPresentationStyle = .fullScreen
+        present(nextVC, animated: true)
+    }
 }
 
