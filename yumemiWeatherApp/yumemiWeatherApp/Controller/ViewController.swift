@@ -14,8 +14,12 @@ class ViewController: UIViewController {
     var maxTempLabel: UILabel! = nil
     var weatherImageView: UIImageView! = nil
     let area = "tokyo"
+    let weatherModel = WeatherModelImpl()
     
     override func viewDidLoad() {
+        
+        
+        
         super.viewDidLoad()
         view.backgroundColor = UIColor.white
         
@@ -75,11 +79,7 @@ class ViewController: UIViewController {
         
     }
     
-//    fileprivate func makeWeatherImageView() -> UIImageView {
-//        let image = updateWeather()
-//        let imageView = UIImageView(image: image)
-//        return imageView
-//    }
+
     
     
     fileprivate func makeJSONSearchData() -> String? {
@@ -93,25 +93,13 @@ class ViewController: UIViewController {
             return nil
         }
     }
-    
-    fileprivate func parseJSON(stringData: String) -> WeatherData? {
-        let decoder = JSONDecoder()
-        do {
-            let decodedData = try decoder.decode(WeatherData.self, from: stringData.data(using: .utf8)!)
-            return decodedData
-        } catch {
-            print(error)
-            return nil
-        }
-    }
-    
+
     @objc fileprivate func updateWeather() {
         
         let searchData = makeJSONSearchData()!
         
         do {
-            let jsonWeather = try YumemiWeather.fetchWeather(searchData)
-            let weatherData = parseJSON(stringData: jsonWeather)!
+            let weatherData = try weatherModel.getWeatherData(searchData: searchData)
             var image = UIImage(named: weatherData.weather)!
             let imageColor = getImageColor(weather: weatherData.weather)
             image = image.withTintColor(imageColor)
@@ -184,4 +172,5 @@ class ViewController: UIViewController {
         present(nextVC, animated: true)
     }
 }
+
 
