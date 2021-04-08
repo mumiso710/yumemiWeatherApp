@@ -28,9 +28,9 @@ class ViewController: UIViewController {
         
         
         
-        minTempLabel = makeLabel(labelName: "min temp", labelColor: UIColor.blue)
-        maxTempLabel = makeLabel(labelName: "max temp", labelColor: UIColor.red)
-        let labelStack = arrangeTwoItemToHStack(Item1: minTempLabel, Item2: maxTempLabel)
+        minTempLabel = UILabel.create(labelName: "min temp", labelColor: UIColor.blue)
+        maxTempLabel = UILabel.create(labelName: "max temp", labelColor: UIColor.red)
+        let labelStack = UIStackView.create(Item1: minTempLabel, Item2: maxTempLabel)
         
         weatherImageView = UIImageView()
         updateWeather()
@@ -56,8 +56,8 @@ class ViewController: UIViewController {
         vStack.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
         vStack.centerYAnchor.constraint(equalTo: view.centerYAnchor).isActive = true
         
-        let closeButton = makeButton(buttonName: "Close")
-        let reloadButton = makeButton(buttonName: "Reload")
+        let closeButton = UIButton.create(buttonName: "Close")
+        let reloadButton = UIButton.create(buttonName: "Reload")
         
         // when "ReloadButton" pressed, update the weather image
         reloadButton.addAction(UIAction(handler: { _ in
@@ -69,7 +69,8 @@ class ViewController: UIViewController {
             self.dismiss(animated: true)
         }), for: .touchUpInside)
         
-        let buttonStack = arrangeTwoItemToHStack(Item1: closeButton, Item2: reloadButton)
+        // create StackView and arrange buttons
+        let buttonStack = UIStackView.create(Item1: closeButton, Item2: reloadButton)
         
         // arrange buttonStack
         view.addSubview(buttonStack)
@@ -79,7 +80,14 @@ class ViewController: UIViewController {
         
     }
     
-
+    
+    override func viewDidDisappear(_ animated: Bool) {
+        let nextVC = ViewController()
+        nextVC.modalPresentationStyle = .fullScreen
+        present(nextVC, animated: true)
+    }
+    
+    
     
     
     fileprivate func makeJSONSearchData() -> String? {
@@ -93,7 +101,7 @@ class ViewController: UIViewController {
             return nil
         }
     }
-
+    
     @objc fileprivate func updateWeather() {
         
         let searchData = makeJSONSearchData()!
@@ -135,8 +143,13 @@ class ViewController: UIViewController {
         }
     }
     
-    
-    fileprivate func makeLabel(labelName: String, labelColor: UIColor) -> UILabel {
+   
+}
+
+
+//MARK: - UILabel
+extension UILabel {
+    static func create(labelName: String, labelColor: UIColor) -> UILabel {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
         label.text = labelName
@@ -145,8 +158,11 @@ class ViewController: UIViewController {
         
         return label
     }
-    
-    fileprivate func makeButton(buttonName: String) -> UIButton {
+}
+
+//MARK: - UIButton
+extension UIButton {
+    static func create(buttonName: String) -> UIButton {
         let button = UIButton()
         button.setTitle(buttonName, for: .normal)
         button.setTitleColor(.cyan, for: .normal)
@@ -154,9 +170,11 @@ class ViewController: UIViewController {
         
         return button
     }
-    
-    fileprivate func arrangeTwoItemToHStack(Item1: UIView, Item2: UIView) -> UIStackView {
-        
+}
+
+//MARK: - UIStackView
+extension UIStackView {
+    static func create(Item1: UIView, Item2: UIView) -> UIStackView {
         let stack = UIStackView()
         stack.translatesAutoresizingMaskIntoConstraints = false
         stack.addArrangedSubview(Item1)
@@ -165,12 +183,5 @@ class ViewController: UIViewController {
         
         return stack
     }
-    
-    override func viewDidDisappear(_ animated: Bool) {
-        let nextVC = ViewController()
-        nextVC.modalPresentationStyle = .fullScreen
-        present(nextVC, animated: true)
-    }
 }
-
 

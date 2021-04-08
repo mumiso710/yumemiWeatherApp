@@ -23,7 +23,7 @@ class WeatherModelImpl: WeatherModel  {
 
 
 
-fileprivate func parseJSON(stringData: String) -> WeatherData? {
+func parseJSON(stringData: String) -> WeatherData? {
     let decoder = JSONDecoder()
     do {
         let decodedData = try decoder.decode(WeatherData.self, from: stringData.data(using: .utf8)!)
