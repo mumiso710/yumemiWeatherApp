@@ -2,8 +2,7 @@
 //  yumemiWeatherAppTests.swift
 //  yumemiWeatherAppTests
 //
-//  Created by 土田理人 on 2021/04/03.
-//
+
 
 import XCTest
 @testable import yumemiWeatherApp
@@ -20,22 +19,38 @@ class yumemiWeatherAppTests: XCTestCase {
         //        print(viewController.getWeather())
     }
     
-    func testWeatherImage() {
-        let weatherModel = WeatherModelSunnyImpl()
+    func testViewController() {
+        let sunnyModel = WeatherModelSunnyImpl()
+        let cloudyModel = WeatherModelCloudyImpl()
+        let rainyModel = WeatherModelRainyImpl()
         
-        let viewController = ViewController()
-        viewController.inject(weatherModel: weatherModel)
+        let viewSunnyController = ViewController.create(weatherModel: sunnyModel)
+        let viewCloudyController = ViewController.create(weatherModel: cloudyModel)
+        let viewRainyController = ViewController.create(weatherModel: rainyModel)
         
-        viewController.loadViewIfNeeded()
-        viewController.view.layoutIfNeeded()
-        
-        
-        XCTContext.runActivity(named: "case: sunny") { _ in
-            XCTAssertTrue("sunny" == viewController.getWeather())
+        XCTContext.runActivity(named: "weatherImageTest") { _ in
+            XCTContext.runActivity(named: "case: sunny") { _ in
+                XCTAssertTrue("sunny" == viewSunnyController.getWeather())
+            }
+            XCTContext.runActivity(named: "case: cloudy") { _ in
+                XCTAssertTrue("cloudy" == viewCloudyController.getWeather())
+            }
+            XCTContext.runActivity(named: "case: rainy") { _ in
+                XCTAssertTrue("rainy" == viewRainyController.getWeather())
+            }
         }
         
+        XCTContext.runActivity(named: "UILabelTest") { _ in
+            XCTContext.runActivity(named: "case: maxTempLabel") { _ in
+                XCTAssertTrue("24" == viewSunnyController.maxTempLabel.text)
+            }
+            XCTContext.runActivity(named: "case: minTempLabel") { _ in
+                XCTAssertTrue("10" == viewCloudyController.minTempLabel.text)
+            }
+        }
+        
+        
     }
-    
     
 }
 
@@ -47,3 +62,14 @@ class WeatherModelSunnyImpl: WeatherModel {
         return WeatherData(weather: .sunny, max_temp: 24, min_temp: 10, date: "2020-04-01T12:00:00+09:00")
     }
 }
+class WeatherModelCloudyImpl: WeatherModel {
+    func getWeatherData(searchData: String) throws -> WeatherData {
+        return WeatherData(weather: .cloudy, max_temp: 24, min_temp: 10, date: "2020-04-01T12:00:00+09:00")
+    }
+}
+class WeatherModelRainyImpl: WeatherModel {
+    func getWeatherData(searchData: String) throws -> WeatherData {
+        return WeatherData(weather: .rainy, max_temp: 24, min_temp: 10, date: "2020-04-01T12:00:00+09:00")
+    }
+}
+

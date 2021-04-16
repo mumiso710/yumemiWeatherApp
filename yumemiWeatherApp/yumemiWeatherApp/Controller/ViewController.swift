@@ -2,8 +2,7 @@
 //  ViewController.swift
 //  yumemiWeatherApp
 //
-//  Created by 土田理人 on 2021/04/03.
-//
+
 
 import UIKit
 import YumemiWeather
@@ -99,11 +98,11 @@ class ViewController: UIViewController {
     
     
     
- 
+    
     @objc fileprivate func updateWeather() {       
         do {
             let searchData = try SearchData(area: area).createJSON()!
-
+            
             let weatherData = try weatherModel.getWeatherData(searchData: searchData)
             weatherImage = UIImage(named: weatherData.weather.rawValue)!
             let imageColor = weatherData.getImageColor()
@@ -129,7 +128,7 @@ class ViewController: UIViewController {
         self.present(alert, animated: true)
     }
     
- 
+    
 }
 
 
@@ -171,4 +170,13 @@ extension UIStackView {
     }
 }
 
-
+//MARK: - ViewController
+extension ViewController {
+    static func create(weatherModel: WeatherModel) -> ViewController {
+        let viewController = ViewController()
+        viewController.inject(weatherModel: weatherModel)
+        viewController.loadViewIfNeeded()
+        viewController.view.layoutIfNeeded()
+        return viewController
+    }
+}

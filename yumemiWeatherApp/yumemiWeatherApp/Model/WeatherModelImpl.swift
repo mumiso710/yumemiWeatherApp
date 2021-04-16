@@ -2,8 +2,6 @@
 //  WeatherModelImpl.swift
 //  yumemiWeatherApp
 //
-//  Created by 土田理人 on 2021/04/08.
-//
 
 import Foundation
 import YumemiWeather
