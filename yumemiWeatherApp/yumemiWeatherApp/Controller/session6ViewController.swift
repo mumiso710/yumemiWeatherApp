@@ -16,6 +16,7 @@ class session6ViewController: UIViewController {
     
     override func viewDidAppear(_ animated: Bool) {
         let nextVC = ViewController()
+        nextVC.inject(weatherModel: WeatherModelImpl())
         nextVC.modalPresentationStyle = .fullScreen
         present(nextVC, animated: true)
     }

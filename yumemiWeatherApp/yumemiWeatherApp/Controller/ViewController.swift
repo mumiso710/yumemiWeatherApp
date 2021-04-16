@@ -31,7 +31,6 @@ class ViewController: UIViewController {
         
         
         super.viewDidLoad()
-        inject(weatherModel: WeatherModelImpl())
         view.backgroundColor = UIColor.white
         
         // set up for NotificationCenter for observing application condition
@@ -106,7 +105,7 @@ class ViewController: UIViewController {
             let searchData = try SearchData(area: area).createJSON()!
 
             let weatherData = try weatherModel.getWeatherData(searchData: searchData)
-            var weatherImage = UIImage(named: weatherData.weather.rawValue)!
+            weatherImage = UIImage(named: weatherData.weather.rawValue)!
             let imageColor = weatherData.getImageColor()
             weatherImage = weatherImage.withTintColor(imageColor)          
             weatherImageView.image = weatherImage

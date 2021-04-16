@@ -24,16 +24,14 @@ class yumemiWeatherAppTests: XCTestCase {
         let weatherModel = WeatherModelSunnyImpl()
         
         let viewController = ViewController()
-        
-        
+        viewController.inject(weatherModel: weatherModel)
         
         viewController.loadViewIfNeeded()
-
-        viewController.inject(weatherModel: weatherModel)
-//        viewController.viewDidLoad()
+        viewController.view.layoutIfNeeded()
+        
         
         XCTContext.runActivity(named: "case: sunny") { _ in
-            XCTAssertTrue("sunny" == viewController.weatherImage.accessibilityIdentifier!)
+            XCTAssertTrue("sunny" == viewController.getWeather())
         }
         
     }
