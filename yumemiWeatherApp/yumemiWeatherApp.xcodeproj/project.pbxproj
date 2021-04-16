@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		85009CBD261D500400F5558C /* session6ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85009CBC261D500400F5558C /* session6ViewController.swift */; };
 		851801E12617B2E300FCF200 /* YumemiWeather in Frameworks */ = {isa = PBXBuildFile; productRef = 851801E02617B2E300FCF200 /* YumemiWeather */; };
 		857DEF47261798CB00D79997 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 857DEF46261798CB00D79997 /* AppDelegate.swift */; };
 		857DEF49261798CB00D79997 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 857DEF48261798CB00D79997 /* SceneDelegate.swift */; };
@@ -38,6 +39,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		85009CBC261D500400F5558C /* session6ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = session6ViewController.swift; sourceTree = "<group>"; };
 		857DEF43261798CB00D79997 /* yumemiWeatherApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = yumemiWeatherApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		857DEF46261798CB00D79997 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		857DEF48261798CB00D79997 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -156,6 +158,7 @@
 			isa = PBXGroup;
 			children = (
 				857DEF4A261798CB00D79997 /* ViewController.swift */,
+				85009CBC261D500400F5558C /* session6ViewController.swift */,
 			);
 			path = Controller;
 			sourceTree = "<group>";
@@ -300,6 +303,7 @@
 				857DEF47261798CB00D79997 /* AppDelegate.swift in Sources */,
 				85F7FF612619FDC600524267 /* WeatherData.swift in Sources */,
 				85DC16B3261A8B18002B9676 /* SearchData.swift in Sources */,
+				85009CBD261D500400F5558C /* session6ViewController.swift in Sources */,
 				857DEF49261798CB00D79997 /* SceneDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
