@@ -12,17 +12,24 @@ class ViewController: UIViewController {
     
     var minTempLabel: UILabel! = nil
     var maxTempLabel: UILabel! = nil
+    var weatherImageView: UIImageView! = nil
+    let area = "tokyo"
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
         view.backgroundColor = UIColor.white
+        
+        let notificationCenter = NotificationCenter.default
+        notificationCenter.addObserver(self, selector: #selector(updateWeather), name: UIApplication.didBecomeActiveNotification, object: nil)
+        
+        
         
         minTempLabel = makeLabel(labelName: "min temp", labelColor: UIColor.blue)
         maxTempLabel = makeLabel(labelName: "max temp", labelColor: UIColor.red)
         let labelStack = arrangeTwoItemToHStack(Item1: minTempLabel, Item2: maxTempLabel)
         
-        let weatherImageView = makeWeatherImageView(area: "tokyo")
+        weatherImageView = UIImageView()
+        updateWeather()
         
         
         
@@ -50,7 +57,7 @@ class ViewController: UIViewController {
         
         // when "ReloadButton" pressed, update the weather image
         reloadButton.addAction(UIAction(handler: { _ in
-            weatherImageView.image = self.updateWeather(area: "tokyo")
+            self.updateWeather()
         }), for: .touchUpInside)
         
         // when "CloseButton" pressed, close ViewController
@@ -68,14 +75,14 @@ class ViewController: UIViewController {
         
     }
     
-    fileprivate func makeWeatherImageView(area: String) -> UIImageView {
-        let image = updateWeather(area: area)
-        let imageView = UIImageView(image: image)
-        return imageView
-    }
+//    fileprivate func makeWeatherImageView() -> UIImageView {
+//        let image = updateWeather()
+//        let imageView = UIImageView(image: image)
+//        return imageView
+//    }
     
     
-    fileprivate func makeJSONSearchData(area: String) -> String? {
+    fileprivate func makeJSONSearchData() -> String? {
         let searchData = SearchData(area: area)
         let encoder = JSONEncoder()
         do {
@@ -98,9 +105,9 @@ class ViewController: UIViewController {
         }
     }
     
-    fileprivate func updateWeather(area: String) -> UIImage? {
+    @objc fileprivate func updateWeather() {
         
-        let searchData = makeJSONSearchData(area: area)!
+        let searchData = makeJSONSearchData()!
         
         do {
             let jsonWeather = try YumemiWeather.fetchWeather(searchData)
@@ -108,22 +115,18 @@ class ViewController: UIViewController {
             var image = UIImage(named: weatherData.weather)!
             let imageColor = getImageColor(weather: weatherData.weather)
             image = image.withTintColor(imageColor)
+            weatherImageView.image = image
             minTempLabel.text = String(weatherData.min_temp)
             maxTempLabel.text = String(weatherData.max_temp)
-            return image
             
         } catch YumemiWeatherError.invalidParameterError {
             presentAlert(alertTitle: "Invalid Parameter Error", alertMessage: "\(area) is not supported by this app.")
-            return UIImage()
         } catch YumemiWeatherError.jsonDecodeError {
             presentAlert(alertTitle: "JSON Decode Error", alertMessage: "unknown error occurred.")
-            return UIImage()
         } catch YumemiWeatherError.unknownError {
             presentAlert(alertTitle: "Unknown Error", alertMessage: "unknown error occurred.")
-            return UIImage()
         } catch {
             print("Please press the \"Reload\" button")
-            return UIImage()
         }
     }
     
