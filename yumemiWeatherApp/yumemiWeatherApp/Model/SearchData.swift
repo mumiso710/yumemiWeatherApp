@@ -19,6 +19,13 @@ struct SearchData: Codable {
         self.area = area
         self.date = formatter.string(from: Date())
     }
-}
+    
+    
+    func createJSON() throws -> String? {
+        let encoder = JSONEncoder()
+        let data = try encoder.encode(self)
+        return String(data: data, encoding: .utf8)
+    }
 
+}
 

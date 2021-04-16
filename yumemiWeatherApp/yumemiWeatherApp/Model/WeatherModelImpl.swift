@@ -14,6 +14,7 @@ protocol WeatherModel {
 }
 
 class WeatherModelImpl: WeatherModel  {
+    
     func getWeatherData(searchData: String) throws -> WeatherData {
         let jsonWeather = try YumemiWeather.fetchWeather(searchData)
         let weatherData = parseJSON(stringData: jsonWeather)!

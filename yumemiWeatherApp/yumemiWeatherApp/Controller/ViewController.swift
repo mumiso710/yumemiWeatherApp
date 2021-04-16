@@ -12,17 +12,29 @@ class ViewController: UIViewController {
     
     var minTempLabel: UILabel! = nil
     var maxTempLabel: UILabel! = nil
+    var weatherImage: UIImage! = nil
     var weatherImageView: UIImageView! = nil
     let area = "tokyo"
-    let weatherModel = WeatherModelImpl()
+    var weatherModel: WeatherModel! = nil
+    
+    
+    func inject(weatherModel: WeatherModel) {
+        self.weatherModel = weatherModel
+    }
+    
+    func getWeather() -> String? {
+        return weatherImage?.accessibilityIdentifier
+    }
     
     override func viewDidLoad() {
         
         
         
         super.viewDidLoad()
+        inject(weatherModel: WeatherModelImpl())
         view.backgroundColor = UIColor.white
         
+        // set up for NotificationCenter for observing application condition
         let notificationCenter = NotificationCenter.default
         notificationCenter.addObserver(self, selector: #selector(updateWeather), name: UIApplication.didBecomeActiveNotification, object: nil)
         
@@ -80,7 +92,6 @@ class ViewController: UIViewController {
         
     }
     
-    
     override func viewDidDisappear(_ animated: Bool) {
         let nextVC = ViewController()
         nextVC.modalPresentationStyle = .fullScreen
@@ -89,29 +100,16 @@ class ViewController: UIViewController {
     
     
     
-    
-    fileprivate func makeJSONSearchData() -> String? {
-        let searchData = SearchData(area: area)
-        let encoder = JSONEncoder()
+ 
+    @objc fileprivate func updateWeather() {       
         do {
-            let data = try encoder.encode(searchData)
-            return String(data: data, encoding: .utf8)
-        } catch {
-            print(error)
-            return nil
-        }
-    }
-    
-    @objc fileprivate func updateWeather() {
-        
-        let searchData = makeJSONSearchData()!
-        
-        do {
+            let searchData = try SearchData(area: area).createJSON()!
+
             let weatherData = try weatherModel.getWeatherData(searchData: searchData)
-            var image = UIImage(named: weatherData.weather)!
-            let imageColor = getImageColor(weather: weatherData.weather)
-            image = image.withTintColor(imageColor)
-            weatherImageView.image = image
+            var weatherImage = UIImage(named: weatherData.weather.rawValue)!
+            let imageColor = weatherData.getImageColor()
+            weatherImage = weatherImage.withTintColor(imageColor)          
+            weatherImageView.image = weatherImage
             minTempLabel.text = String(weatherData.min_temp)
             maxTempLabel.text = String(weatherData.max_temp)
             
@@ -132,18 +130,7 @@ class ViewController: UIViewController {
         self.present(alert, animated: true)
     }
     
-    
-    fileprivate func getImageColor(weather: String) -> UIColor {
-        if weather == "sunny" {
-            return UIColor.red
-        } else if weather == "cloudy" {
-            return UIColor.gray
-        } else {
-            return UIColor.blue
-        }
-    }
-    
-   
+ 
 }
 
 
@@ -184,4 +171,5 @@ extension UIStackView {
         return stack
     }
 }
+
 

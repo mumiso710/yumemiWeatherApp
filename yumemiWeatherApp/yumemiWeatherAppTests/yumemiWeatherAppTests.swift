@@ -9,26 +9,43 @@ import XCTest
 @testable import yumemiWeatherApp
 
 class yumemiWeatherAppTests: XCTestCase {
-
+    
+    
+    
     override func setUpWithError() throws {
-        // Put setup code here. This method is called before the invocation of each test method in the class.
+        //        let weatherModel = WeatherModelTestImpl()
+        //        let viewController = ViewController()
+        //        viewController.inject(weatherModel: weatherModel)
+        //        viewController.viewDidLoad()
+        //        print(viewController.getWeather())
+    }
+    
+    func testWeatherImage() {
+        let weatherModel = WeatherModelSunnyImpl()
+        
+        let viewController = ViewController()
+        
+        
+        
+        viewController.loadViewIfNeeded()
+
+        viewController.inject(weatherModel: weatherModel)
+//        viewController.viewDidLoad()
+        
+        XCTContext.runActivity(named: "case: sunny") { _ in
+            XCTAssertTrue("sunny" == viewController.weatherImage.accessibilityIdentifier!)
+        }
         
     }
+    
+    
+}
 
-    override func tearDownWithError() throws {
-        // Put teardown code here. This method is called after the invocation of each test method in the class.
+
+//MARK: - WeatherModelTestImpl
+class WeatherModelSunnyImpl: WeatherModel {
+    
+    func getWeatherData(searchData: String) throws -> WeatherData {
+        return WeatherData(weather: .sunny, max_temp: 24, min_temp: 10, date: "2020-04-01T12:00:00+09:00")
     }
-
-    func testExample() throws {
-        // This is an example of a functional test case.
-        // Use XCTAssert and related functions to verify your tests produce the correct results.
-    }
-
-    func testPerformanceExample() throws {
-        // This is an example of a performance test case.
-        self.measure {
-            // Put the code you want to measure the time of here.
-        }
-    }
-
 }
