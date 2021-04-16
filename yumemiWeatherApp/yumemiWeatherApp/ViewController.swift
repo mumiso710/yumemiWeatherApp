@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import YumemiWeather
 
 class ViewController: UIViewController {
     
@@ -14,10 +15,11 @@ class ViewController: UIViewController {
         
         let weatherImageView = makeWeatherImageView()
         
-        let blueLabel = makeLabel(labelName: "blue label", labelColor: UIColor.blue, leadingAnchor: weatherImageView.leadingAnchor)
-        let redLabel = makeLabel(labelName: "red label", labelColor: UIColor.red, leadingAnchor: weatherImageView.centerXAnchor)
+        let blueLabel = makeLabel(labelName: "blue label", labelColor: UIColor.blue)
+        let redLabel = makeLabel(labelName: "red label", labelColor: UIColor.red)
         let labelStack = arrangeTwoItemToHStack(Item1: blueLabel, Item2: redLabel)
         
+        // vStack set up
         let vStack = UIStackView()
         vStack.axis = .vertical
         vStack.translatesAutoresizingMaskIntoConstraints = false
@@ -39,6 +41,13 @@ class ViewController: UIViewController {
         let closeButton = makeButton(buttonName: "Close")
         let reloadButton = makeButton(buttonName: "Reload")
         
+        // when "ReloadButton" pressed, update the weather image
+        reloadButton.addAction(UIAction(handler: { _ in
+            let weather = YumemiWeather.fetchWeather()
+            weatherImageView.image = UIImage(named: weather)
+            weatherImageView.image = weatherImageView.image?.withTintColor(self.getImageColor(weather: weather), renderingMode: .alwaysOriginal)
+        }), for: .touchUpInside)
+        
         let buttonStack = arrangeTwoItemToHStack(Item1: closeButton, Item2: reloadButton)
         
         // arrange buttonStack
@@ -46,15 +55,17 @@ class ViewController: UIViewController {
         buttonStack.widthAnchor.constraint(equalTo: vStack.widthAnchor).isActive = true
         buttonStack.topAnchor.constraint(equalTo: vStack.bottomAnchor, constant: 80).isActive = true
         buttonStack.leadingAnchor.constraint(equalTo: vStack.leadingAnchor).isActive = true
-        
-        
-        
+    
     }
     
     
     fileprivate func makeWeatherImageView() -> UIImageView{
         
-        let image = UIImage(named: "sunny")
+        let weather = YumemiWeather.fetchWeather()
+        
+        var image = UIImage(named: weather)
+        let imageColor = getImageColor(weather: weather)
+        image = image?.withTintColor(imageColor, renderingMode: .alwaysOriginal)
         let imageView = UIImageView(image: image)
         
         imageView.translatesAutoresizingMaskIntoConstraints = false
@@ -63,7 +74,18 @@ class ViewController: UIViewController {
   
     }
     
-    fileprivate func makeLabel(labelName: String, labelColor: UIColor, leadingAnchor: NSLayoutXAxisAnchor) -> UILabel {
+    fileprivate func getImageColor(weather: String) -> UIColor {
+        if weather == "sunny" {
+            return UIColor.red
+        } else if weather == "cloudy" {
+            return UIColor.gray
+        } else {
+            return UIColor.blue
+        }
+    }
+    
+    
+    fileprivate func makeLabel(labelName: String, labelColor: UIColor) -> UILabel {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
         label.text = labelName
