@@ -2,7 +2,7 @@
 //  searchData.swift
 //  yumemiWeatherApp
 //
-//  Created by 土田理人 on 2021/04/05.
+
 //
 
 import Foundation

@@ -36,6 +36,8 @@ class ViewController: UIViewController {
         let notificationCenter = NotificationCenter.default
         notificationCenter.addObserver(self, selector: #selector(updateWeather), name: UIApplication.didBecomeActiveNotification, object: nil)
         
+        // set up for
+        
         
         
         minTempLabel = UILabel.create(labelName: "min temp", labelColor: UIColor.blue)
@@ -76,6 +78,7 @@ class ViewController: UIViewController {
         
         // when "CloseButton" pressed, close ViewController
         closeButton.addAction(UIAction(handler: { _ in
+            //TODO: dismissは親のViewControllerが行う(delegate design pattern を利用する)
             self.dismiss(animated: true)
         }), for: .touchUpInside)
         

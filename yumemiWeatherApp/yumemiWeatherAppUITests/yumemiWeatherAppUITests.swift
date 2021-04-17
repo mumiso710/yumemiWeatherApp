@@ -2,7 +2,7 @@
 //  yumemiWeatherAppUITests.swift
 //  yumemiWeatherAppUITests
 //
-//  Created by 土田理人 on 2021/04/03.
+
 //
 
 import XCTest
