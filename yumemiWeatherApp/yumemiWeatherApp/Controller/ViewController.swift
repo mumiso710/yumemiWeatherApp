@@ -15,6 +15,7 @@ class ViewController: UIViewController {
     var weatherImageView: UIImageView! = nil
     let area = "tokyo"
     var weatherModel: WeatherModel! = nil
+    var activityIndicator: UIActivityIndicatorView! = nil
     
     
     func inject(weatherModel: WeatherModel) {
@@ -36,7 +37,9 @@ class ViewController: UIViewController {
         let notificationCenter = NotificationCenter.default
         notificationCenter.addObserver(self, selector: #selector(updateWeather), name: UIApplication.didBecomeActiveNotification, object: nil)
         
-        // set up for
+        // initialize activityIndicator
+        activityIndicator = UIActivityIndicatorView()
+        view.addSubview(activityIndicator)
         
         
         
@@ -91,6 +94,12 @@ class ViewController: UIViewController {
         buttonStack.topAnchor.constraint(equalTo: vStack.bottomAnchor, constant: 80).isActive = true
         buttonStack.leadingAnchor.constraint(equalTo: vStack.leadingAnchor).isActive = true
         
+        // set up for ActivityIndicator
+        activityIndicator.translatesAutoresizingMaskIntoConstraints = false
+        activityIndicator.topAnchor.constraint(equalTo: weatherImageView.bottomAnchor, constant: 70).isActive = true
+        activityIndicator.centerXAnchor.constraint(equalTo: weatherImageView.centerXAnchor).isActive = true
+        
+        
     }
     
     override func viewDidDisappear(_ animated: Bool) {
@@ -102,26 +111,44 @@ class ViewController: UIViewController {
     
     
     
-    @objc fileprivate func updateWeather() {       
-        do {
-            let searchData = try SearchData(area: area).createJSON()!
-            
-            let weatherData = try weatherModel.getWeatherData(searchData: searchData)
-            weatherImage = UIImage(named: weatherData.weather.rawValue)!
-            let imageColor = weatherData.getImageColor()
-            weatherImage = weatherImage.withTintColor(imageColor)          
-            weatherImageView.image = weatherImage
-            minTempLabel.text = String(weatherData.min_temp)
-            maxTempLabel.text = String(weatherData.max_temp)
-            
-        } catch YumemiWeatherError.invalidParameterError {
-            presentAlert(alertTitle: "Invalid Parameter Error", alertMessage: "\(area) is not supported by this app.")
-        } catch YumemiWeatherError.jsonDecodeError {
-            presentAlert(alertTitle: "JSON Decode Error", alertMessage: "unknown error occurred.")
-        } catch YumemiWeatherError.unknownError {
-            presentAlert(alertTitle: "Unknown Error", alertMessage: "unknown error occurred.")
-        } catch {
-            print("Please press the \"Reload\" button")
+    @objc fileprivate func updateWeather() {
+        activityIndicator.startAnimating()
+        DispatchQueue.global().async {
+            do {
+                let searchData = try SearchData(area: self.area).createJSON()!
+                let weatherData = try self.weatherModel.getWeatherData(searchData: searchData)
+                
+                DispatchQueue.main.async {
+                    self.activityIndicator.stopAnimating()
+                    self.weatherImage = UIImage(named: weatherData.weather.rawValue)!
+                    let imageColor = weatherData.getImageColor()
+                    self.weatherImage = self.weatherImage.withTintColor(imageColor)
+                    self.weatherImageView.image = self.weatherImage
+                    self.minTempLabel.text = String(weatherData.min_temp)
+                    self.maxTempLabel.text = String(weatherData.max_temp)
+                }
+                
+            } catch YumemiWeatherError.invalidParameterError {
+                DispatchQueue.main.async {
+                    self.activityIndicator.stopAnimating()
+                    self.presentAlert(alertTitle: "Invalid Parameter Error", alertMessage: "\(self.area) is not supported by this app.")
+                }
+            } catch YumemiWeatherError.jsonDecodeError {
+                DispatchQueue.main.async {
+                    self.activityIndicator.stopAnimating()
+                    self.presentAlert(alertTitle: "JSON Decode Error", alertMessage: "unknown error occurred.")
+                }
+            } catch YumemiWeatherError.unknownError {
+                DispatchQueue.main.async {
+                    self.activityIndicator.stopAnimating()
+                    self.presentAlert(alertTitle: "Unknown Error", alertMessage: "unknown error occurred.")
+                }
+            } catch {
+                DispatchQueue.main.async {
+                    self.activityIndicator.stopAnimating()
+                }
+                print("Please press the \"Reload\" button")
+            }
         }
     }
     
