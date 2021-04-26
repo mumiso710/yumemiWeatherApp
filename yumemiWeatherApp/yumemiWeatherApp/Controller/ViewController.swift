@@ -7,7 +7,9 @@
 import UIKit
 import YumemiWeather
 
-class ViewController: UIViewController {
+class ViewController: UIViewController, WeatherModelDelegate {
+    
+    
     
     var minTempLabel: UILabel! = nil
     var maxTempLabel: UILabel! = nil
@@ -17,10 +19,16 @@ class ViewController: UIViewController {
     var weatherModel: WeatherModel! = nil
     var activityIndicator: UIActivityIndicatorView! = nil
     
+    deinit {
+        NSLog("deinit")
+    }    
     
     func inject(weatherModel: WeatherModel) {
         self.weatherModel = weatherModel
+        self.weatherModel.delegate = self
     }
+    
+    
     
     func getWeather() -> String? {
         return weatherImage?.accessibilityIdentifier
@@ -104,6 +112,7 @@ class ViewController: UIViewController {
     
     override func viewDidDisappear(_ animated: Bool) {
         let nextVC = ViewController()
+        nextVC.inject(weatherModel: WeatherModelImpl())
         nextVC.modalPresentationStyle = .fullScreen
         present(nextVC, animated: true)
     }
@@ -111,13 +120,19 @@ class ViewController: UIViewController {
     
     
     
+    
+    //TODO: Resultを利用してエラーハンドリングを書き直す
     @objc fileprivate func updateWeather() {
         activityIndicator.startAnimating()
         DispatchQueue.global().async {
-            do {
-                let searchData = try SearchData(area: self.area).createJSON()!
-                let weatherData = try self.weatherModel.getWeatherData(searchData: searchData)
-                
+            
+            let result = self.weatherModel.getWeatherData(area: self.area)
+            var alertTitle = ""
+            var alertMessage = ""
+
+            
+            switch result {
+            case .success(let weatherData):
                 DispatchQueue.main.async {
                     self.activityIndicator.stopAnimating()
                     self.weatherImage = UIImage(named: weatherData.weather.rawValue)!
@@ -127,27 +142,23 @@ class ViewController: UIViewController {
                     self.minTempLabel.text = String(weatherData.min_temp)
                     self.maxTempLabel.text = String(weatherData.max_temp)
                 }
-                
-            } catch YumemiWeatherError.invalidParameterError {
+            case .failure(YumemiWeatherError.invalidParameterError):
+                alertTitle = "Invalid Parameter Error"
+                alertMessage = "\(self.area) is not supported by this app."
+                fallthrough
+            case .failure(YumemiWeatherError.jsonDecodeError):
+                alertTitle = "JSON Decode Error"
+                alertMessage = "JSON decode error ouccured."
+                fallthrough
+            case .failure(YumemiWeatherError.unknownError):
+                alertTitle = "Unknown Error"
+                alertMessage = "Unknown error ouccured."
+                fallthrough
+            case .failure:
                 DispatchQueue.main.async {
                     self.activityIndicator.stopAnimating()
-                    self.presentAlert(alertTitle: "Invalid Parameter Error", alertMessage: "\(self.area) is not supported by this app.")
+                    self.presentAlert(alertTitle: alertTitle, alertMessage: alertMessage)
                 }
-            } catch YumemiWeatherError.jsonDecodeError {
-                DispatchQueue.main.async {
-                    self.activityIndicator.stopAnimating()
-                    self.presentAlert(alertTitle: "JSON Decode Error", alertMessage: "unknown error occurred.")
-                }
-            } catch YumemiWeatherError.unknownError {
-                DispatchQueue.main.async {
-                    self.activityIndicator.stopAnimating()
-                    self.presentAlert(alertTitle: "Unknown Error", alertMessage: "unknown error occurred.")
-                }
-            } catch {
-                DispatchQueue.main.async {
-                    self.activityIndicator.stopAnimating()
-                }
-                print("Please press the \"Reload\" button")
             }
         }
     }
@@ -209,4 +220,9 @@ extension ViewController {
         viewController.view.layoutIfNeeded()
         return viewController
     }
+    
+    func didGetWeatherData() {
+        print("get weather data")
+    }
 }
+

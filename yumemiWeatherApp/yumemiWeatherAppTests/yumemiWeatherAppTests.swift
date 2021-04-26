@@ -57,18 +57,24 @@ class yumemiWeatherAppTests: XCTestCase {
 
 //MARK: - WeatherModelTestImpl
 class WeatherModelSunnyImpl: WeatherModel {
+    var delegate: WeatherModelDelegate?
     
-    func getWeatherData(searchData: String) throws -> WeatherData {
+    
+    func getWeatherData(area: String) throws -> WeatherData {
         return WeatherData(weather: .sunny, max_temp: 24, min_temp: 10, date: "2020-04-01T12:00:00+09:00")
     }
 }
 class WeatherModelCloudyImpl: WeatherModel {
-    func getWeatherData(searchData: String) throws -> WeatherData {
+    var delegate: WeatherModelDelegate?
+    
+    func getWeatherData(area: String) throws -> WeatherData {
         return WeatherData(weather: .cloudy, max_temp: 24, min_temp: 10, date: "2020-04-01T12:00:00+09:00")
     }
 }
 class WeatherModelRainyImpl: WeatherModel {
-    func getWeatherData(searchData: String) throws -> WeatherData {
+    var delegate: WeatherModelDelegate?
+    
+    func getWeatherData(area: String) throws -> WeatherData {
         return WeatherData(weather: .rainy, max_temp: 24, min_temp: 10, date: "2020-04-01T12:00:00+09:00")
     }
 }
