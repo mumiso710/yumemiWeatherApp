@@ -9,7 +9,6 @@ import YumemiWeather
 
 protocol WeatherModel {
     var delegate: WeatherModelDelegate? { get set }
-    //   func getWeatherData(area: String) throws -> WeatherData
     func getWeatherData(area: String) -> Result<WeatherData, YumemiWeatherError>
 }
 
@@ -20,13 +19,7 @@ protocol WeatherModelDelegate {
 
 class WeatherModelImpl: WeatherModel  {
     var delegate: WeatherModelDelegate?
-    //    func getWeatherData(area: String) throws -> WeatherData {
-    //        let searchData = try SearchData(area: area).createJSON()!
-    //        let jsonWeather = try YumemiWeather.syncFetchWeather(searchData)
-    //        let weatherData = parseJSON(stringData: jsonWeather)!
-    //        delegate?.didGetWeatherData()
-    //        return weatherData
-    //    }
+
     func getWeatherData(area: String) -> Result<WeatherData, YumemiWeatherError> {
         do {
             let searchData = try SearchData(area: area).createJSON()!

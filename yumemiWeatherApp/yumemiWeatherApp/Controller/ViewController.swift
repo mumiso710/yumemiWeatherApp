@@ -18,6 +18,7 @@ class ViewController: UIViewController, WeatherModelDelegate {
     let area = "tokyo"
     var weatherModel: WeatherModel! = nil
     var activityIndicator: UIActivityIndicatorView! = nil
+    var delegate: ViewControllerDelegate?
     
     deinit {
         NSLog("deinit")
@@ -36,8 +37,6 @@ class ViewController: UIViewController, WeatherModelDelegate {
     
     override func viewDidLoad() {
         
-        
-        
         super.viewDidLoad()
         view.backgroundColor = UIColor.white
         
@@ -49,8 +48,6 @@ class ViewController: UIViewController, WeatherModelDelegate {
         activityIndicator = UIActivityIndicatorView()
         view.addSubview(activityIndicator)
         
-        
-        
         minTempLabel = UILabel.create(labelName: "min temp", labelColor: UIColor.blue)
         maxTempLabel = UILabel.create(labelName: "max temp", labelColor: UIColor.red)
         let labelStack = UIStackView.create(Item1: minTempLabel, Item2: maxTempLabel)
@@ -58,14 +55,11 @@ class ViewController: UIViewController, WeatherModelDelegate {
         weatherImageView = UIImageView()
         updateWeather()
         
-        
-        
         // vStack set up
         let vStack = UIStackView()
         vStack.axis = .vertical
         vStack.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(vStack)
-        
         
         vStack.addArrangedSubview(weatherImageView)
         
@@ -89,8 +83,7 @@ class ViewController: UIViewController, WeatherModelDelegate {
         
         // when "CloseButton" pressed, close ViewController
         closeButton.addAction(UIAction(handler: { _ in
-            //TODO: dismissは親のViewControllerが行う(delegate design pattern を利用する)
-            self.dismiss(animated: true)
+            self.delegate?.didPressedCloseButton()
         }), for: .touchUpInside)
         
         // create StackView and arrange buttons
@@ -107,18 +100,7 @@ class ViewController: UIViewController, WeatherModelDelegate {
         activityIndicator.topAnchor.constraint(equalTo: weatherImageView.bottomAnchor, constant: 70).isActive = true
         activityIndicator.centerXAnchor.constraint(equalTo: weatherImageView.centerXAnchor).isActive = true
         
-        
     }
-    
-    override func viewDidDisappear(_ animated: Bool) {
-        let nextVC = ViewController()
-        nextVC.inject(weatherModel: WeatherModelImpl())
-        nextVC.modalPresentationStyle = .fullScreen
-        present(nextVC, animated: true)
-    }
-    
-    
-    
     
     
     //TODO: Resultを利用してエラーハンドリングを書き直す
@@ -130,7 +112,6 @@ class ViewController: UIViewController, WeatherModelDelegate {
             var alertTitle = ""
             var alertMessage = ""
 
-            
             switch result {
             case .success(let weatherData):
                 DispatchQueue.main.async {
@@ -226,3 +207,7 @@ extension ViewController {
     }
 }
 
+//MARK: - ViewControlelrDelegate
+protocol ViewControllerDelegate {
+    func didPressedCloseButton()
+}
