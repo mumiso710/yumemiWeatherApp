@@ -195,8 +195,7 @@ extension ViewController: WeatherModelDelegate {
         case .failure(YumemiWeatherError.jsonDecodeError):
             alertTitle = "JSON Decode Error"
             alertMessage = "JSON decode error ouccured."
-            fallthrough
-            /Users/tsuchidarihito/ios/yumemiWeatherApp/yumemiWeatherApp/yumemiWeatherAppTests        case .failure(YumemiWeatherError.unknownError):
+        case .failure(YumemiWeatherError.unknownError):
             alertTitle = "Unknown Error"
             alertMessage = "Unknown error ouccured."
             fallthrough
