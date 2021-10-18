@@ -2,7 +2,7 @@
 //  SceneDelegate.swift
 //  yumemiWeatherApp
 //
-//  Created by 土田理人 on 2021/04/03.
+//  Created by  on 2021/04/03.
 //
 
 import UIKit

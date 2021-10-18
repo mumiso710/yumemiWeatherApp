@@ -2,7 +2,7 @@
 //  session6ViewController.swift
 //  yumemiWeatherApp
 //
-//  Created by 土田理人 on 2021/04/07.
+//  Created by on 2021/04/07.
 //
 
 import UIKit
