@@ -2,8 +2,7 @@
 //  ViewController.swift
 //  yumemiWeatherApp
 //
-//  Created by 土田理人 on 2021/04/03.
-//
+
 
 import UIKit
 import YumemiWeather
@@ -12,21 +11,36 @@ class ViewController: UIViewController {
     
     var minTempLabel: UILabel! = nil
     var maxTempLabel: UILabel! = nil
+    var weatherImage: UIImage! = nil
     var weatherImageView: UIImageView! = nil
     let area = "tokyo"
+    var weatherModel: WeatherModel! = nil
+    
+    
+    func inject(weatherModel: WeatherModel) {
+        self.weatherModel = weatherModel
+    }
+    
+    func getWeather() -> String? {
+        return weatherImage?.accessibilityIdentifier
+    }
     
     override func viewDidLoad() {
+        
+        
+        
         super.viewDidLoad()
         view.backgroundColor = UIColor.white
         
+        // set up for NotificationCenter for observing application condition
         let notificationCenter = NotificationCenter.default
         notificationCenter.addObserver(self, selector: #selector(updateWeather), name: UIApplication.didBecomeActiveNotification, object: nil)
         
         
         
-        minTempLabel = makeLabel(labelName: "min temp", labelColor: UIColor.blue)
-        maxTempLabel = makeLabel(labelName: "max temp", labelColor: UIColor.red)
-        let labelStack = arrangeTwoItemToHStack(Item1: minTempLabel, Item2: maxTempLabel)
+        minTempLabel = UILabel.create(labelName: "min temp", labelColor: UIColor.blue)
+        maxTempLabel = UILabel.create(labelName: "max temp", labelColor: UIColor.red)
+        let labelStack = UIStackView.create(Item1: minTempLabel, Item2: maxTempLabel)
         
         weatherImageView = UIImageView()
         updateWeather()
@@ -52,8 +66,8 @@ class ViewController: UIViewController {
         vStack.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
         vStack.centerYAnchor.constraint(equalTo: view.centerYAnchor).isActive = true
         
-        let closeButton = makeButton(buttonName: "Close")
-        let reloadButton = makeButton(buttonName: "Reload")
+        let closeButton = UIButton.create(buttonName: "Close")
+        let reloadButton = UIButton.create(buttonName: "Reload")
         
         // when "ReloadButton" pressed, update the weather image
         reloadButton.addAction(UIAction(handler: { _ in
@@ -65,7 +79,8 @@ class ViewController: UIViewController {
             self.dismiss(animated: true)
         }), for: .touchUpInside)
         
-        let buttonStack = arrangeTwoItemToHStack(Item1: closeButton, Item2: reloadButton)
+        // create StackView and arrange buttons
+        let buttonStack = UIStackView.create(Item1: closeButton, Item2: reloadButton)
         
         // arrange buttonStack
         view.addSubview(buttonStack)
@@ -75,47 +90,24 @@ class ViewController: UIViewController {
         
     }
     
-//    fileprivate func makeWeatherImageView() -> UIImageView {
-//        let image = updateWeather()
-//        let imageView = UIImageView(image: image)
-//        return imageView
-//    }
-    
-    
-    fileprivate func makeJSONSearchData() -> String? {
-        let searchData = SearchData(area: area)
-        let encoder = JSONEncoder()
-        do {
-            let data = try encoder.encode(searchData)
-            return String(data: data, encoding: .utf8)
-        } catch {
-            print(error)
-            return nil
-        }
+    override func viewDidDisappear(_ animated: Bool) {
+        let nextVC = ViewController()
+        nextVC.modalPresentationStyle = .fullScreen
+        present(nextVC, animated: true)
     }
     
-    fileprivate func parseJSON(stringData: String) -> WeatherData? {
-        let decoder = JSONDecoder()
-        do {
-            let decodedData = try decoder.decode(WeatherData.self, from: stringData.data(using: .utf8)!)
-            return decodedData
-        } catch {
-            print(error)
-            return nil
-        }
-    }
     
-    @objc fileprivate func updateWeather() {
-        
-        let searchData = makeJSONSearchData()!
-        
+    
+    
+    @objc fileprivate func updateWeather() {       
         do {
-            let jsonWeather = try YumemiWeather.fetchWeather(searchData)
-            let weatherData = parseJSON(stringData: jsonWeather)!
-            var image = UIImage(named: weatherData.weather)!
-            let imageColor = getImageColor(weather: weatherData.weather)
-            image = image.withTintColor(imageColor)
-            weatherImageView.image = image
+            let searchData = try SearchData(area: area).createJSON()!
+            
+            let weatherData = try weatherModel.getWeatherData(searchData: searchData)
+            weatherImage = UIImage(named: weatherData.weather.rawValue)!
+            let imageColor = weatherData.getImageColor()
+            weatherImage = weatherImage.withTintColor(imageColor)          
+            weatherImageView.image = weatherImage
             minTempLabel.text = String(weatherData.min_temp)
             maxTempLabel.text = String(weatherData.max_temp)
             
@@ -137,18 +129,12 @@ class ViewController: UIViewController {
     }
     
     
-    fileprivate func getImageColor(weather: String) -> UIColor {
-        if weather == "sunny" {
-            return UIColor.red
-        } else if weather == "cloudy" {
-            return UIColor.gray
-        } else {
-            return UIColor.blue
-        }
-    }
-    
-    
-    fileprivate func makeLabel(labelName: String, labelColor: UIColor) -> UILabel {
+}
+
+
+//MARK: - UILabel
+extension UILabel {
+    static func create(labelName: String, labelColor: UIColor) -> UILabel {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
         label.text = labelName
@@ -157,8 +143,11 @@ class ViewController: UIViewController {
         
         return label
     }
-    
-    fileprivate func makeButton(buttonName: String) -> UIButton {
+}
+
+//MARK: - UIButton
+extension UIButton {
+    static func create(buttonName: String) -> UIButton {
         let button = UIButton()
         button.setTitle(buttonName, for: .normal)
         button.setTitleColor(.cyan, for: .normal)
@@ -166,9 +155,11 @@ class ViewController: UIViewController {
         
         return button
     }
-    
-    fileprivate func arrangeTwoItemToHStack(Item1: UIView, Item2: UIView) -> UIStackView {
-        
+}
+
+//MARK: - UIStackView
+extension UIStackView {
+    static func create(Item1: UIView, Item2: UIView) -> UIStackView {
         let stack = UIStackView()
         stack.translatesAutoresizingMaskIntoConstraints = false
         stack.addArrangedSubview(Item1)
@@ -177,11 +168,15 @@ class ViewController: UIViewController {
         
         return stack
     }
-    
-    override func viewDidDisappear(_ animated: Bool) {
-        let nextVC = ViewController()
-        nextVC.modalPresentationStyle = .fullScreen
-        present(nextVC, animated: true)
-    }
 }
 
+//MARK: - ViewController
+extension ViewController {
+    static func create(weatherModel: WeatherModel) -> ViewController {
+        let viewController = ViewController()
+        viewController.inject(weatherModel: weatherModel)
+        viewController.loadViewIfNeeded()
+        viewController.view.layoutIfNeeded()
+        return viewController
+    }
+}
