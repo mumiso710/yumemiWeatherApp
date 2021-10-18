@@ -9,6 +9,8 @@ import YumemiWeather
 
 class ViewController: UIViewController {
     
+    
+    
     var minTempLabel: UILabel! = nil
     var maxTempLabel: UILabel! = nil
     var weatherImage: UIImage! = nil
@@ -16,19 +18,24 @@ class ViewController: UIViewController {
     let area = "tokyo"
     var weatherModel: WeatherModel! = nil
     var activityIndicator: UIActivityIndicatorView! = nil
+    var delegate: ViewControllerDelegate?
     
+    deinit {
+        print("deinit")
+    }    
     
     func inject(weatherModel: WeatherModel) {
         self.weatherModel = weatherModel
+        self.weatherModel.delegate = self
     }
+    
+    
     
     func getWeather() -> String? {
         return weatherImage?.accessibilityIdentifier
     }
     
     override func viewDidLoad() {
-        
-        
         
         super.viewDidLoad()
         view.backgroundColor = UIColor.white
@@ -41,8 +48,6 @@ class ViewController: UIViewController {
         activityIndicator = UIActivityIndicatorView()
         view.addSubview(activityIndicator)
         
-        
-        
         minTempLabel = UILabel.create(labelName: "min temp", labelColor: UIColor.blue)
         maxTempLabel = UILabel.create(labelName: "max temp", labelColor: UIColor.red)
         let labelStack = UIStackView.create(Item1: minTempLabel, Item2: maxTempLabel)
@@ -50,14 +55,11 @@ class ViewController: UIViewController {
         weatherImageView = UIImageView()
         updateWeather()
         
-        
-        
         // vStack set up
         let vStack = UIStackView()
         vStack.axis = .vertical
         vStack.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(vStack)
-        
         
         vStack.addArrangedSubview(weatherImageView)
         
@@ -81,8 +83,7 @@ class ViewController: UIViewController {
         
         // when "CloseButton" pressed, close ViewController
         closeButton.addAction(UIAction(handler: { _ in
-            //TODO: dismissは親のViewControllerが行う(delegate design pattern を利用する)
-            self.dismiss(animated: true)
+            self.delegate?.didPressedCloseButton()
         }), for: .touchUpInside)
         
         // create StackView and arrange buttons
@@ -99,56 +100,14 @@ class ViewController: UIViewController {
         activityIndicator.topAnchor.constraint(equalTo: weatherImageView.bottomAnchor, constant: 70).isActive = true
         activityIndicator.centerXAnchor.constraint(equalTo: weatherImageView.centerXAnchor).isActive = true
         
-        
     }
-    
-    override func viewDidDisappear(_ animated: Bool) {
-        let nextVC = ViewController()
-        nextVC.modalPresentationStyle = .fullScreen
-        present(nextVC, animated: true)
-    }
-    
     
     
     
     @objc fileprivate func updateWeather() {
         activityIndicator.startAnimating()
         DispatchQueue.global().async {
-            do {
-                let searchData = try SearchData(area: self.area).createJSON()!
-                let weatherData = try self.weatherModel.getWeatherData(searchData: searchData)
-                
-                DispatchQueue.main.async {
-                    self.activityIndicator.stopAnimating()
-                    self.weatherImage = UIImage(named: weatherData.weather.rawValue)!
-                    let imageColor = weatherData.getImageColor()
-                    self.weatherImage = self.weatherImage.withTintColor(imageColor)
-                    self.weatherImageView.image = self.weatherImage
-                    self.minTempLabel.text = String(weatherData.min_temp)
-                    self.maxTempLabel.text = String(weatherData.max_temp)
-                }
-                
-            } catch YumemiWeatherError.invalidParameterError {
-                DispatchQueue.main.async {
-                    self.activityIndicator.stopAnimating()
-                    self.presentAlert(alertTitle: "Invalid Parameter Error", alertMessage: "\(self.area) is not supported by this app.")
-                }
-            } catch YumemiWeatherError.jsonDecodeError {
-                DispatchQueue.main.async {
-                    self.activityIndicator.stopAnimating()
-                    self.presentAlert(alertTitle: "JSON Decode Error", alertMessage: "unknown error occurred.")
-                }
-            } catch YumemiWeatherError.unknownError {
-                DispatchQueue.main.async {
-                    self.activityIndicator.stopAnimating()
-                    self.presentAlert(alertTitle: "Unknown Error", alertMessage: "unknown error occurred.")
-                }
-            } catch {
-                DispatchQueue.main.async {
-                    self.activityIndicator.stopAnimating()
-                }
-                print("Please press the \"Reload\" button")
-            }
+            let result = self.weatherModel.getWeatherData(area: self.area)
         }
     }
     
@@ -209,4 +168,47 @@ extension ViewController {
         viewController.view.layoutIfNeeded()
         return viewController
     }
+    
+    
+}
+extension ViewController: WeatherModelDelegate {
+    func didGetWeatherData(result: Result<WeatherData, YumemiWeatherError>) {
+//        print("get weather data")
+        var alertTitle = ""
+        var alertMessage = ""
+        
+        switch result {
+        case .success(let weatherData):
+            DispatchQueue.main.async {
+                self.activityIndicator.stopAnimating()
+                self.weatherImage = UIImage(named: weatherData.weather.rawValue)!
+                let imageColor = weatherData.getImageColor()
+                self.weatherImage = self.weatherImage.withTintColor(imageColor)
+                self.weatherImageView.image = self.weatherImage
+                self.minTempLabel.text = String(weatherData.min_temp)
+                self.maxTempLabel.text = String(weatherData.max_temp)
+            }
+        case .failure(YumemiWeatherError.invalidParameterError):
+            alertTitle = "Invalid Parameter Error"
+            alertMessage = "\(self.area) is not supported by this app."
+            fallthrough
+        case .failure(YumemiWeatherError.jsonDecodeError):
+            alertTitle = "JSON Decode Error"
+            alertMessage = "JSON decode error ouccured."
+            fallthrough
+            /Users/tsuchidarihito/ios/yumemiWeatherApp/yumemiWeatherApp/yumemiWeatherAppTests        case .failure(YumemiWeatherError.unknownError):
+            alertTitle = "Unknown Error"
+            alertMessage = "Unknown error ouccured."
+            fallthrough
+        case .failure:
+            DispatchQueue.main.async {
+                self.activityIndicator.stopAnimating()
+                self.presentAlert(alertTitle: alertTitle, alertMessage: alertMessage)
+            }
+        }
+    }
+}
+//MARK: - ViewControlelrDelegate
+protocol ViewControllerDelegate {
+    func didPressedCloseButton()
 }

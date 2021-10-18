@@ -6,6 +6,7 @@
 
 import XCTest
 @testable import yumemiWeatherApp
+import YumemiWeather
 
 class yumemiWeatherAppTests: XCTestCase {
     
@@ -27,6 +28,8 @@ class yumemiWeatherAppTests: XCTestCase {
         let viewSunnyController = ViewController.create(weatherModel: sunnyModel)
         let viewCloudyController = ViewController.create(weatherModel: cloudyModel)
         let viewRainyController = ViewController.create(weatherModel: rainyModel)
+        
+        
         
         XCTContext.runActivity(named: "weatherImageTest") { _ in
             XCTContext.runActivity(named: "case: sunny") { _ in
@@ -57,19 +60,21 @@ class yumemiWeatherAppTests: XCTestCase {
 
 //MARK: - WeatherModelTestImpl
 class WeatherModelSunnyImpl: WeatherModel {
-    
-    func getWeatherData(searchData: String) throws -> WeatherData {
-        return WeatherData(weather: .sunny, max_temp: 24, min_temp: 10, date: "2020-04-01T12:00:00+09:00")
+    var delegate: WeatherModelDelegate?
+    func getWeatherData(area: String) {
+        return .success(WeatherData(weather: .sunny, max_temp: 24, min_temp: 10, date: "2020-04-01T12:00:00+09:00"))
     }
 }
 class WeatherModelCloudyImpl: WeatherModel {
-    func getWeatherData(searchData: String) throws -> WeatherData {
-        return WeatherData(weather: .cloudy, max_temp: 24, min_temp: 10, date: "2020-04-01T12:00:00+09:00")
+    var delegate: WeatherModelDelegate?
+    func getWeatherData(area: String) {
+        return .success(WeatherData(weather: .cloudy, max_temp: 24, min_temp: 10, date: "2020-04-01T12:00:00+09:00"))
     }
 }
 class WeatherModelRainyImpl: WeatherModel {
-    func getWeatherData(searchData: String) throws -> WeatherData {
-        return WeatherData(weather: .rainy, max_temp: 24, min_temp: 10, date: "2020-04-01T12:00:00+09:00")
+    var delegate: WeatherModelDelegate?
+    func getWeatherData(area: String) {
+        return .success(WeatherData(weather: .rainy, max_temp: 24, min_temp: 10, date: "2020-04-01T12:00:00+09:00"))
     }
 }
 
