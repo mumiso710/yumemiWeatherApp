@@ -7,7 +7,7 @@
 import UIKit
 import YumemiWeather
 
-class ViewController: UIViewController, WeatherModelDelegate {
+class ViewController: UIViewController {
     
     
     
@@ -21,7 +21,7 @@ class ViewController: UIViewController, WeatherModelDelegate {
     var delegate: ViewControllerDelegate?
     
     deinit {
-        NSLog("deinit")
+        print("deinit")
     }    
     
     func inject(weatherModel: WeatherModel) {
@@ -103,44 +103,11 @@ class ViewController: UIViewController, WeatherModelDelegate {
     }
     
     
-    //TODO: Resultを利用してエラーハンドリングを書き直す
+    
     @objc fileprivate func updateWeather() {
         activityIndicator.startAnimating()
         DispatchQueue.global().async {
-            
             let result = self.weatherModel.getWeatherData(area: self.area)
-            var alertTitle = ""
-            var alertMessage = ""
-
-            switch result {
-            case .success(let weatherData):
-                DispatchQueue.main.async {
-                    self.activityIndicator.stopAnimating()
-                    self.weatherImage = UIImage(named: weatherData.weather.rawValue)!
-                    let imageColor = weatherData.getImageColor()
-                    self.weatherImage = self.weatherImage.withTintColor(imageColor)
-                    self.weatherImageView.image = self.weatherImage
-                    self.minTempLabel.text = String(weatherData.min_temp)
-                    self.maxTempLabel.text = String(weatherData.max_temp)
-                }
-            case .failure(YumemiWeatherError.invalidParameterError):
-                alertTitle = "Invalid Parameter Error"
-                alertMessage = "\(self.area) is not supported by this app."
-                fallthrough
-            case .failure(YumemiWeatherError.jsonDecodeError):
-                alertTitle = "JSON Decode Error"
-                alertMessage = "JSON decode error ouccured."
-                fallthrough
-            case .failure(YumemiWeatherError.unknownError):
-                alertTitle = "Unknown Error"
-                alertMessage = "Unknown error ouccured."
-                fallthrough
-            case .failure:
-                DispatchQueue.main.async {
-                    self.activityIndicator.stopAnimating()
-                    self.presentAlert(alertTitle: alertTitle, alertMessage: alertMessage)
-                }
-            }
         }
     }
     
@@ -202,11 +169,45 @@ extension ViewController {
         return viewController
     }
     
-    func didGetWeatherData() {
-        print("get weather data")
+    
+}
+extension ViewController: WeatherModelDelegate {
+    func didGetWeatherData(result: Result<WeatherData, YumemiWeatherError>) {
+//        print("get weather data")
+        var alertTitle = ""
+        var alertMessage = ""
+        
+        switch result {
+        case .success(let weatherData):
+            DispatchQueue.main.async {
+                self.activityIndicator.stopAnimating()
+                self.weatherImage = UIImage(named: weatherData.weather.rawValue)!
+                let imageColor = weatherData.getImageColor()
+                self.weatherImage = self.weatherImage.withTintColor(imageColor)
+                self.weatherImageView.image = self.weatherImage
+                self.minTempLabel.text = String(weatherData.min_temp)
+                self.maxTempLabel.text = String(weatherData.max_temp)
+            }
+        case .failure(YumemiWeatherError.invalidParameterError):
+            alertTitle = "Invalid Parameter Error"
+            alertMessage = "\(self.area) is not supported by this app."
+            fallthrough
+        case .failure(YumemiWeatherError.jsonDecodeError):
+            alertTitle = "JSON Decode Error"
+            alertMessage = "JSON decode error ouccured."
+            fallthrough
+            /Users/tsuchidarihito/ios/yumemiWeatherApp/yumemiWeatherApp/yumemiWeatherAppTests        case .failure(YumemiWeatherError.unknownError):
+            alertTitle = "Unknown Error"
+            alertMessage = "Unknown error ouccured."
+            fallthrough
+        case .failure:
+            DispatchQueue.main.async {
+                self.activityIndicator.stopAnimating()
+                self.presentAlert(alertTitle: alertTitle, alertMessage: alertMessage)
+            }
+        }
     }
 }
-
 //MARK: - ViewControlelrDelegate
 protocol ViewControllerDelegate {
     func didPressedCloseButton()

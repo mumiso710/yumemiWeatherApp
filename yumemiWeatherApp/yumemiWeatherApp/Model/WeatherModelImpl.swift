@@ -9,27 +9,40 @@ import YumemiWeather
 
 protocol WeatherModel {
     var delegate: WeatherModelDelegate? { get set }
-    func getWeatherData(area: String) -> Result<WeatherData, YumemiWeatherError>
+    func getWeatherData(area: String)
 }
 
 protocol WeatherModelDelegate {
-    func didGetWeatherData()
+    func didGetWeatherData(result: Result<WeatherData, YumemiWeatherError>)
 }
 
-
+typealias weatherResult = Result<WeatherData, YumemiWeatherError>
 class WeatherModelImpl: WeatherModel  {
+    
     var delegate: WeatherModelDelegate?
 
-    func getWeatherData(area: String) -> Result<WeatherData, YumemiWeatherError> {
+    func getWeatherData(area: String) {
         do {
             let searchData = try SearchData(area: area).createJSON()!
             let jsonWeather = try YumemiWeather.syncFetchWeather(searchData)
             let weatherData = parseJSON(stringData: jsonWeather)!
             
-            delegate?.didGetWeatherData()
-            return .success(weatherData)
+            delegate?.didGetWeatherData(result: .success(weatherData))
         } catch {
-            return .failure(error as! YumemiWeatherError)
+            delegate?.didGetWeatherData(result: .failure(error as! YumemiWeatherError))
+        }
+    }
+    
+    //TODO: session11
+    func getWeatherDataCallBack(area: String, completion: (weatherResult) -> Void) {
+        do {
+            let searchData = try SearchData(area: area).createJSON()!
+            let jsonWeather = try YumemiWeather.syncFetchWeather(searchData)
+            let weatherData = parseJSON(stringData: jsonWeather)!
+            
+            delegate?.didGetWeatherData(result: .success(weatherData))
+        } catch {
+            delegate?.didGetWeatherData(result: .failure(error as! YumemiWeatherError))
         }
     }
 }
